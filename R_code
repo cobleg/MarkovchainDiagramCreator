@@ -3,7 +3,6 @@
 
 library(heemod)
 library(diagram)
-
 library(shiny)
 library(shinyMatrix)
 
@@ -33,21 +32,18 @@ server=function(input,output){
   
   output$matrix <-renderUI({
     
-  states <- unlist(strsplit(x=input$statenames_1,split = "[[:punct:]]"))
+  states <- unlist( strsplit( x=input$statenames_1, split = "[[:punct:]]" ))
   statenames <- list(states, states)
-  m <- (matrix( c(0), length( states ), length( states ), dimnames = statenames ) )  
+  m <- (matrix( c(0), length( states ), length( states ), dimnames = statenames ))  
   m1 <- matrixInput("matrix1", rows = list( names = T, editableNames = F ), cols = list( names = T, editableNames = F ),
               value =  m )
   m1
-    
-  })
+   })
   
 
  mTM_List <- reactive({
-    mTM <- as.list( (as.numeric(t( input$matrix1 ) ) ) )
-    mTM$state_names <- (as.character( rownames( input$matrix1  )))
-    
-    
+    mTM <- as.list( ( as.numeric( t( input$matrix1 ) ) ) )
+    mTM$state_names <- ( as.character( rownames( input$matrix1  )))
     mTM
   })
   
@@ -56,9 +52,6 @@ server=function(input,output){
     
   })
   
-  output$table <- renderTable(input$matrix1, rownames = TRUE)
 }
 
 shinyApp(ui,server)
-
-
