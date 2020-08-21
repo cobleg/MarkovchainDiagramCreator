@@ -10,20 +10,26 @@ ui=shinyUI(fluidPage(
   fluidRow(
     sidebarPanel(
       textAreaInput("statenames_1",label = "Enter state names here...", value = "H, S1, S2, D"),
+      
       hr(),
       tags$h4("Enter state probability transition matrix here: "),
-      uiOutput("matrix")
-    ), # end of sidebarPanel
+      uiOutput("matrix"),
+      downloadButton("TransitionMatrix.csv", "Download matrix")  # Button
+
+      ), # end of sidebarPanel
     
     mainPanel(
       hr(),
-      plotOutput("plot")
+      plotOutput("plot"),
+      downloadButton("MarkovchainDiagram.png", "Download plot")  # Button
+      
     ) # end of mainPanel
   )))
 
 server=function(input,output){
   
   output$matrix <-renderUI({
+    
     states <- unlist( strsplit( x=input$statenames_1, split = "[[:punct:]]" ))
     statenames <- list(states, states)
     m <- (matrix( c(0), length( states ), length( states ), dimnames = statenames ))  
@@ -31,7 +37,8 @@ server=function(input,output){
                       value =  m )
     m1
   })
-
+  
+  
   mTM_List <- reactive({
     req(input$matrix1)
     mTM <- as.list( ( as.numeric( t( input$matrix1 ) ) ) )
@@ -43,6 +50,27 @@ server=function(input,output){
     plot(do.call( define_transition,   mTM_List() ) , cex=0.75, ylim = c(0,.4))
     
   })
+  
+  # Downloadable csv of Markovchain transition matrix dataset ----
+  output$TransitionMatrix.csv <- downloadHandler(
+    filename = function() {
+      "TransitionMatrix.csv"
+    },
+    content = function(file) {
+      write.csv( as.data.frame( input$matrix1 ) , file, row.names = T )
+    }
+  ) # end of download transition matrix
+  
+  # Downloadable image of Markovchain diagram ----
+  output$MarkovchainDiagram.png <- downloadHandler(
+    filename = function() { "MarkovchainDiagram.png" },
+    content = function(file) {
+      png(file)
+      print( plot(do.call( define_transition,   mTM_List() ) , cex=0.75, ylim = c(0,.4)) )
+      dev.off()
+    }
+    
+  ) # end of download Markovchain diagram
   
 }
 
